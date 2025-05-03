@@ -1,80 +1,70 @@
-const searchBtn = document.getElementById("searchBtn");
-const input = document.getElementById("searchInput");
+document.querySelector("button").addEventListener("click", async () => {
+  const username = document.querySelector("input").value;
+  if (!username) return alert("Please enter a channel username.");
 
-searchBtn.addEventListener("click", async () => {
-  const query = input.value.trim();
-  if (!query) {
-    alert("Please enter a YouTube channel name.");
-    return;
-  }
-
-  const API_KEY = "AIzaSyAXSNrsnp-ikNLvGqH0O4aYxLDPdbbtiPE"; // Replace with your API key
+  const apiKey = "YOUR_YOUTUBE_API_KEY"; // Replace with your actual API key
+  const statsDiv = document.querySelector(".stats");
+  const earningsDiv = document.querySelector(".earnings");
+  statsDiv.innerHTML = "Loading...";
+  earningsDiv.innerHTML = "";
 
   try {
-    // Search channel by name
-    const searchRes = await fetch(
-      `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${encodeURIComponent(
-        query
-      )}&maxResults=1&key=${API_KEY}`
-    );
-    const searchData = await searchRes.json();
-    if (!searchData.items.length) {
-      alert("Channel not found.");
-      return;
+    // Get channel ID from username
+    const res1 = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&forUsername=${username}&key=${apiKey}`);
+    const data1 = await res1.json();
+    
+    let channel = data1.items[0];
+    
+    // If username not found, try search by channel name
+    if (!channel) {
+      const res2 = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${username}&key=${apiKey}`);
+      const data2 = await res2.json();
+      const channelId = data2.items[0]?.snippet?.channelId;
+      if (!channelId) throw new Error("Channel not found.");
+
+      const res3 = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${channelId}&key=${apiKey}`);
+      const data3 = await res3.json();
+      channel = data3.items[0];
     }
 
-    const channel = searchData.items[0];
-    const channelId = channel.snippet.channelId;
+    const title = channel.snippet.title;
+    const subscribers = channel.statistics.subscriberCount;
+    const views = channel.statistics.viewCount;
+    const videos = channel.statistics.videoCount;
+    const profileImg = channel.snippet.thumbnails.default.url;
 
-    // Get channel statistics
-    const channelRes = await fetch(
-      `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics,brandingSettings&id=${channelId}&key=${API_KEY}`
-    );
-    const channelData = await channelRes.json();
-    const info = channelData.items[0];
-    const stats = info.statistics;
+    statsDiv.innerHTML = `
+      <div class="channel-info">
+        <img src="${profileImg}" alt="Channel Image" class="channel-img">
+        <div>
+          <h3>${title}</h3>
+          <p><strong>Subscribers:</strong> ${parseInt(subscribers).toLocaleString()}</p>
+          <p><strong>Total Views:</strong> ${parseInt(views).toLocaleString()}</p>
+          <p><strong>Videos:</strong> ${videos}</p>
+          <p><strong>Business Email:</strong> Not public / Check channel 'About' section</p>
+        </div>
+      </div>
+    `;
 
-    const name = info.snippet.title;
-    const desc = info.snippet.description;
-    const img = info.snippet.thumbnails.high.url;
-    const subs = parseInt(stats.subscriberCount);
-    const views = parseInt(stats.viewCount);
-    const videos = parseInt(stats.videoCount);
-    const avgViews = videos > 0 ? Math.floor(views / videos) : 0;
-    const engagement = ((avgViews / subs) * 100).toFixed(2);
+    // Estimate Earnings (Assuming mostly long-form videos)
+    const averageCPM = 150; // INR per 1000 views
+    const estimatedRPM = 80; // INR per 1000 views actually earned by creator
+    const estimatedMonthlyViews = parseInt(views) / (parseInt(videos) || 1) * 10; // crude logic: avg views * 10 recent uploads
 
-    // Earning estimation logic
-    let videoType = "long"; // Default to long-form
-    if (desc.includes("short") || desc.includes("Shorts")) {
-      videoType = "short";
-    }
+    const estimatedMonthlyEarnings = (estimatedMonthlyViews / 1000) * estimatedRPM;
 
-    const CPM = videoType === "short" ? 1.5 : 4; // Default CPM for short-form and long-form videos
-    const RPM = CPM * 0.6; // Revenue per 1000 views (typically 60% of CPM)
+    earningsDiv.innerHTML = `
+      <div class="earnings">
+        <h3>Estimated Monthly Earnings</h3>
+        <p class="earnings-value">₹${Math.floor(estimatedMonthlyEarnings).toLocaleString()}</p>
+        <p><small>💡 Based on average RPM of ₹${estimatedRPM}/1000 views for long-form videos.</small></p>
+        <p><small>📌 CPM ≈ ₹${averageCPM} | RPM ≈ ₹${estimatedRPM}</small></p>
+        <p><small>Views estimated from past content and total views.</small></p>
+      </div>
+    `;
 
-    const monthlyEarnings = ((avgViews * RPM * 30) / 1000).toFixed(2); // Monthly earnings based on RPM
-
-    // Update UI
-    document.getElementById("channelName").textContent = name;
-    document.getElementById("channelDesc").textContent =
-      desc.slice(0, 120) + "...";
-    document.getElementById("channelImg").src = img;
-
-    document.getElementById("subsCount").textContent = subs.toLocaleString();
-    document.getElementById("viewsCount").textContent = views.toLocaleString();
-    document.getElementById("videosCount").textContent =
-      videos.toLocaleString();
-    document.getElementById("avgViews").textContent = avgViews.toLocaleString();
-    document.getElementById("engagementScore").textContent = `${engagement}%`;
-
-    // Show Monthly Earnings
-    document.getElementById(
-      "earnings"
-    ).textContent = `$${monthlyEarnings} / month`;
-
-    document.getElementById("channelCard").classList.remove("hidden");
   } catch (error) {
-    alert("Something went wrong. Try again later.");
+    statsDiv.innerHTML = "Channel not found or error occurred.";
     console.error(error);
   }
 });
