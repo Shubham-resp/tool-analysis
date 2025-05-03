@@ -8,7 +8,7 @@ searchBtn.addEventListener("click", async () => {
     return;
   }
 
-  const API_KEY = "AIzaSyAXSNrsnp-ikNLvGqH0O4aYxLDPdbbtiPE"; // Replace with your API key
+  const API_KEY = "YOUTUBE_API_KEY"; // Replace with your API key
 
   try {
     // Search channel by name
