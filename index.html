@@ -1,152 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Buzz Analytics</title>
-  <style>
-    :root {
-      --bg: #0f0f12;
-      --card: #1e1e24;
-      --text: #f0f0f0;
-      --accent: #6e44ff;
-    }
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      margin: 0;
-      padding: 20px;
-      min-height: 100vh;
-    }
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-    }
-    h1 {
-      text-align: center;
-      margin-bottom: 30px;
-      font-weight: 600;
-    }
-    .search-box {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 30px;
-    }
-    input, button {
-      padding: 12px 15px;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-    }
-    input {
-      flex: 1;
-      background: var(--card);
-      color: var(--text);
-    }
-    button {
-      background: var(--accent);
-      color: white;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    button:hover {
-      opacity: 0.9;
-      transform: translateY(-2px);
-    }
-    .card {
-      background: var(--card);
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      animation: fadeIn 0.5s ease;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 15px;
-      margin-top: 15px;
-    }
-    .stat {
-      text-align: center;
-    }
-    .stat h3 {
-      margin: 0;
-      font-size: 14px;
-      color: #aaa;
-    }
-    .stat p {
-      margin: 5px 0 0;
-      font-size: 24px;
-      font-weight: 700;
-    }
-    .platform {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 10px;
-    }
-    .platform img {
-      width: 24px;
-      height: 24px;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>Buzz Analytics</h1>
-    <div class="search-box">
-      <input type="text" id="username" placeholder="Enter Instagram or YouTube username">
-      <button onclick="fetchData()">Search</button>
-    </div>
-    <div id="results">
-      <!-- Results will appear here -->
-    </div>
-  </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zephyre Analytics - YouTube Influencer Analytics</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Zephyre Analytics</h1>
+      <p>Search a YouTube channel to get analytics and estimated earnings</p>
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="Enter YouTube channel name"
+      />
+      <button id="searchBtn">Search</button>
 
-  <script>
-    function fetchData() {
-      const username = document.getElementById("username").value;
-      const resultsDiv = document.getElementById("results");
-      
-      // FAKE DATA (for demo)
-      const fakeData = {
-        username: username,
-        platform: "Instagram", // or "YouTube"
-        followers: Math.floor(Math.random() * 500000) + 10000,
-        engagement: (Math.random() * 5 + 2).toFixed(2),
-        avgLikes: Math.floor(Math.random() * 10000) + 500
-      };
-      
-      // Display results
-      resultsDiv.innerHTML = `
-        <div class="card">
-          <div class="platform">
-            <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="Instagram">
-            <h2>${fakeData.username}</h2>
-          </div>
-          <div class="stats">
-            <div class="stat">
-              <h3>Followers</h3>
-              <p>${fakeData.followers.toLocaleString()}</p>
-            </div>
-            <div class="stat">
-              <h3>Engagement</h3>
-              <p>${fakeData.engagement}%</p>
-            </div>
-            <div class="stat">
-              <h3>Avg. Likes</h3>
-              <p>${fakeData.avgLikes.toLocaleString()}</p>
-            </div>
+      <!-- Analytics Card -->
+      <div id="channelCard" class="card hidden">
+        <div class="channel-info">
+          <img id="channelImg" src="" alt="Channel Image" class="channel-img" />
+          <div>
+            <h2 id="channelName"></h2>
+            <p id="channelDesc"></p>
           </div>
         </div>
-      `;
-    }
-  </script>
-</body>
+        <div class="stats">
+          <p><strong>Subscribers:</strong> <span id="subsCount">0</span></p>
+          <p><strong>Total Views:</strong> <span id="viewsCount">0</span></p>
+          <p><strong>Videos:</strong> <span id="videosCount">0</span></p>
+          <p>
+            <strong>Average Views per Video:</strong>
+            <span id="avgViews">0</span>
+          </p>
+          <p>
+            <strong>Engagement Rate:</strong>
+            <span id="engagementScore">0%</span>
+          </p>
+        </div>
+        <!-- Earnings Section -->
+        <div class="earnings">
+          <h3>Estimated Monthly Earnings</h3>
+          <p id="earnings" class="earnings-value">Loading...</p>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
 </html>
